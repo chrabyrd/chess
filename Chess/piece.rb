@@ -138,6 +138,50 @@ class Rook < Piece
 end
 
 class Pawn < Piece
+
+  def moves(board)
+    possible_moves = []
+
+    if self.color == :white
+      right_diag = [self.location[0] + 1, self.location[1] + 1]
+      left_diag = [self.location[0] + 1, self.location[1] - 1]
+      advance_move = [self.location[0] + 1, self.location[1]]
+      advance_two = [self.location[0] + 2, self.location[1]]
+
+      possible_moves << right_diag if board[right_diag].color == :black &&
+                                      board.in_bounds?(right_diag)
+      possible_moves << left_diag if board[left_diag].color == :black &&
+                                     board.in_bounds?(left_diag)
+      possible_moves << advance_move unless board[advance_move].color ||
+                                     !board.in_bounds?(advance_move)
+      if possible_moves.include?(advance_move) && self.location[0] == 1
+        possible_moves << advance_two unless board[advance_move].color ||
+                                     !board.in_bounds?(advance_move)
+      end
+    elsif self.color == :black
+      right_diag = [self.location[0] - 1, self.location[1] + 1]
+      left_diag = [self.location[0] - 1, self.location[1] - 1]
+      advance_move = [self.location[0] - 1, self.location[1]]
+      advance_two = [self.location[0] - 2, self.location[1]]
+
+      possible_moves << right_diag if board[right_diag].color == :white &&
+                                      board.in_bounds?(right_diag)
+      possible_moves << left_diag if board[left_diag].color == :white &&
+                                     board.in_bounds?(left_diag)
+      possible_moves << advance_move unless board[advance_move].color ||
+                                     !board.in_bounds?(advance_move)
+      if possible_moves.include?(advance_move) && self.location[0] == 6
+        possible_moves << advance_two unless board[advance_move].color ||
+                                     !board.in_bounds?(advance_move)
+      end
+    end
+    return possible_moves
+  end
+
+  def move_dirs
+    #duck typing
+  end
+
   def to_s
     @color == :black ? UNICODE_HASH[:black_pawn] : UNICODE_HASH[:white_pawn]
   end

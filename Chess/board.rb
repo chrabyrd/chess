@@ -27,6 +27,20 @@ class Board
     pos.all? { |num| num.between?(0, 7) }
   end
 
+  def in_check?(color)
+
+  end
+
+  def find_king(color)
+    @grid.each do |row|
+      row.each do |square|
+        return square.location if square.is_a?(King) &&
+                                  square.color == color
+      end
+    end
+    nil
+  end
+
   private
 
   def create_pieces
@@ -85,8 +99,9 @@ end
 b = Board.new
 
 
+b.move_piece([7,7],[5,0])
+b.move_piece([0,0],[5,1])
 
-
-p b[[0, 1]].moves(b)
+p b.find_king(:black)
 
 # p b
