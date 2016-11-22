@@ -1,5 +1,8 @@
 require_relative 'piece.rb'
+
 class Board
+  attr_reader :grid
+  
   def initialize
     @grid = Array.new(8) { Array.new(8) }
     create_pieces
@@ -15,6 +18,10 @@ class Board
 
   def move_piece(start_pos,end_pos)
     self[start_pos], self[end_pos] = self[end_pos], self[start_pos]
+  end
+
+  def in_bounds?(pos)
+    pos.all? { |num| num.between?(0, 7) }
   end
 
   private
@@ -71,8 +78,8 @@ class Board
   end
 end
 
-b = Board.new
-
-b.move_piece([0,0], [0,1])
-
-p b
+# b = Board.new
+#
+# b.move_piece([0,0], [0,1])
+#
+# p b
