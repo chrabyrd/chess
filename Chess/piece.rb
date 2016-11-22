@@ -18,14 +18,15 @@ UNICODE_HASH = {
 #rook [[0,1],[1,0],[-1,0],[0,-1]]
 
 module SlidingPiece
-  def moves(directions_array, board)
+  def moves(board)
     possible_moves = []
-    directions_array.each do |direction|
+    move_dirs.each do |direction|
       current_pos = self.location.dup
       while board.in_bounds?(current_pos)
         possible_moves << current_pos unless current_pos == self.location
         current_pos = [ current_pos[0] + direction[0],
                         current_pos[1] + direction[1] ]
+        next unless board.in_bounds?(current_pos)
         current_color = board[current_pos].color
         unless current_color.nil?
           unless self.color == current_color
@@ -40,7 +41,17 @@ module SlidingPiece
 end
 
 module SteppingPiece
-
+  def moves(board)
+    possible_moves = []
+    move_dirs.each do |direction|
+      possible_move = [ self.location[0] + direction[0],
+                        self.location[1] + direction[1] ]
+      if board.in_bounds?(possible_move) && self.color != board[possible_move].color
+        possible_moves << possible_move
+      end
+    end
+    possible_moves
+  end
 end
 
 class Piece
@@ -48,6 +59,10 @@ class Piece
   attr_reader :color
   def initialize(color, location)
     @color = color
+    @location = location
+  end
+
+  def update_location(location)
     @location = location
   end
 
@@ -62,6 +77,12 @@ class Piece
 end
 
 class King < Piece
+  include SteppingPiece
+
+  def move_dirs
+    [[1, 1], [1, -1], [-1, 1], [-1, -1], [0, 1], [1, 0], [-1, 0], [0, -1]]
+  end
+
   def to_s
     @color == :black ? UNICODE_HASH[:black_king] : UNICODE_HASH[:white_king]
   end
@@ -69,6 +90,10 @@ end
 
 class Queen < Piece
   include SlidingPiece
+
+  def move_dirs
+    [[1, 1], [1, -1], [-1, 1], [-1, -1], [0, 1], [1, 0], [-1, 0], [0, -1]]
+  end
 
   def to_s
     @color == :black ? UNICODE_HASH[:black_queen] : UNICODE_HASH[:white_queen]
@@ -78,12 +103,22 @@ end
 class Bishop < Piece
   include SlidingPiece
 
+  def move_dirs
+    [[1, 1], [1, -1], [-1, 1], [-1, -1]]
+  end
+
   def to_s
     @color == :black ? UNICODE_HASH[:black_bishop] : UNICODE_HASH[:white_bishop]
   end
 end
 
 class Knight < Piece
+  include SteppingPiece
+
+  def move_dirs
+    [[2, 1], [2, -1], [-1, 2], [-1, -2], [1, 2], [1, -2], [-2, 1], [-2, -1]]
+  end
+
   def to_s
     @color == :black ? UNICODE_HASH[:black_knight] : UNICODE_HASH[:white_knight]
   end
@@ -92,6 +127,9 @@ end
 class Rook < Piece
   include SlidingPiece
 
+  def move_dirs
+    [[0, 1], [1, 0], [-1, 0], [0, -1]]
+  end
 
 
   def to_s

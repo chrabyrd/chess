@@ -18,6 +18,9 @@ class Board
 
   def move_piece(start_pos, end_pos)
     self[start_pos], self[end_pos] = self[end_pos], self[start_pos]
+    self[start_pos].update_location(start_pos)
+    self[end_pos].update_location(end_pos)
+
   end
 
   def in_bounds?(pos)
@@ -81,6 +84,9 @@ end
 
 b = Board.new
 
-p b[0,0].moves
+
+
+
+p b[[0, 1]].moves(b)
 
 # p b
