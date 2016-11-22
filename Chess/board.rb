@@ -2,7 +2,7 @@ require_relative 'piece.rb'
 
 class Board
   attr_reader :grid
-  
+
   def initialize
     @grid = Array.new(8) { Array.new(8) }
     create_pieces
@@ -16,7 +16,7 @@ class Board
     @grid[pos[0]][pos[1]] = value
   end
 
-  def move_piece(start_pos,end_pos)
+  def move_piece(start_pos, end_pos)
     self[start_pos], self[end_pos] = self[end_pos], self[start_pos]
   end
 
@@ -37,49 +37,50 @@ class Board
   end
 
   def create_kings
-    self[[0, 3]], self[[7, 3]] = King.new(:white), King.new(:black)
+    self[[0, 3]], self[[7, 3]] = King.new(:white,[0, 3]), King.new(:black, [7, 3])
   end
 
   def create_queens
-    self[[0, 4]], self[[7, 4]] = Queen.new(:white), Queen.new(:black)
+    self[[0, 4]], self[[7, 4]] = Queen.new(:white, [0, 4]), Queen.new(:black, [7, 4])
   end
 
   def create_bishops
-    self[[0, 5]], self[[0, 2]] = Bishop.new(:white), Bishop.new(:white)
-    self[[7, 5]], self[[7, 2]] = Bishop.new(:black), Bishop.new(:black)
+    self[[0, 5]], self[[0, 2]] = Bishop.new(:white, [0, 5]), Bishop.new(:white, [0, 2])
+    self[[7, 5]], self[[7, 2]] = Bishop.new(:black, [7, 5]), Bishop.new(:black, [7, 2])
   end
 
   def create_knights
-    self[[0, 1]], self[[0, 6]] = Knight.new(:white), Knight.new(:white)
-    self[[7, 1]], self[[7, 6]] = Knight.new(:black), Knight.new(:black)
+    self[[0, 1]], self[[0, 6]] = Knight.new(:white, [0, 1]), Knight.new(:white, [0, 6])
+    self[[7, 1]], self[[7, 6]] = Knight.new(:black, [7, 1]), Knight.new(:black, [7, 6])
   end
 
   def create_rooks
-    self[[0, 0]], self[[0, 7]] = Rook.new(:white), Rook.new(:white)
-    self[[7, 0]], self[[7, 7]] = Rook.new(:black), Rook.new(:black)
+    self[[0, 0]], self[[0, 7]] = Rook.new(:white, [0, 0]), Rook.new(:white, [0, 7])
+    self[[7, 0]], self[[7, 7]] = Rook.new(:black, [7, 0]), Rook.new(:black, [7, 7])
   end
 
   def create_null_pieces
+    single_null_piece = NullPiece.instance
     2.upto(5) do |row|
       @grid[row].map! do
-        NullPiece.new(:nil)
+        single_null_piece
       end
     end
   end
 
   def create_pawns
-    @grid[1].map! do
-      Pawn.new(:white)
+    @grid[1].map!.with_index do |_, idx|
+      Pawn.new(:white, [1, idx])
     end
 
-    @grid[6].map! do
-      Pawn.new(:black)
+    @grid[6].map!.with_index do |_, idx|
+      Pawn.new(:black, [6, idx])
     end
   end
 end
 
-# b = Board.new
-#
-# b.move_piece([0,0], [0,1])
-#
+b = Board.new
+
+p b[0,0].moves
+
 # p b

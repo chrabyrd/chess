@@ -1,3 +1,5 @@
+require 'singleton'
+
 UNICODE_HASH = {
   white_king: "\u2654".encode('utf-8'),
   white_queen: "\u2655".encode('utf-8'),
@@ -13,14 +15,48 @@ UNICODE_HASH = {
   black_pawn: "\u265f".encode('utf-8')
 }
 
+#rook [[0,1],[1,0],[-1,0],[0,-1]]
+
+module SlidingPiece
+  def moves(directions_array, board)
+    possible_moves = []
+    directions_array.each do |direction|
+      current_pos = self.location.dup
+      while board.in_bounds?(current_pos)
+        possible_moves << current_pos unless current_pos == self.location
+        current_pos = [ current_pos[0] + direction[0],
+                        current_pos[1] + direction[1] ]
+        current_color = board[current_pos].color
+        unless current_color.nil?
+          unless self.color == current_color
+            possible_moves << current_pos
+          end
+          break
+        end
+      end
+    end
+    possible_moves
+  end
+end
+
+module SteppingPiece
+
+end
 
 class Piece
-  def initialize(color)
+  attr_accessor :location
+  attr_reader :color
+  def initialize(color, location)
     @color = color
+    @location = location
   end
 
   def to_s
+    #duck typing
+  end
 
+  def moves
+    #duck typing
   end
 
 end
@@ -32,12 +68,16 @@ class King < Piece
 end
 
 class Queen < Piece
+  include SlidingPiece
+
   def to_s
     @color == :black ? UNICODE_HASH[:black_queen] : UNICODE_HASH[:white_queen]
   end
 end
 
 class Bishop < Piece
+  include SlidingPiece
+
   def to_s
     @color == :black ? UNICODE_HASH[:black_bishop] : UNICODE_HASH[:white_bishop]
   end
@@ -50,6 +90,10 @@ class Knight < Piece
 end
 
 class Rook < Piece
+  include SlidingPiece
+
+
+
   def to_s
     @color == :black ? UNICODE_HASH[:black_rook] : UNICODE_HASH[:white_rook]
   end
@@ -62,6 +106,11 @@ class Pawn < Piece
 end
 
 class NullPiece < Piece
+  include Singleton
+
+  def initialize
+  end
+
   def to_s
     "-"
   end
