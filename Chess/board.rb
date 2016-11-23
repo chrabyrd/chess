@@ -1,11 +1,16 @@
 require_relative 'piece.rb'
+require 'byebug'
 
 class Board
   attr_reader :grid
 
-  def initialize
-    @grid = Array.new(8) { Array.new(8) }
-    create_pieces
+  def initialize(grid = default_board)
+    @grid = grid
+    create_pieces if @grid[0][0].nil?
+  end
+
+  def default_board
+    Array.new(8) { Array.new(8) }
   end
 
   def [](pos)
@@ -20,7 +25,6 @@ class Board
     self[start_pos], self[end_pos] = self[end_pos], self[start_pos]
     self[start_pos].update_location(start_pos)
     self[end_pos].update_location(end_pos)
-
   end
 
   def in_bounds?(pos)
@@ -28,20 +32,49 @@ class Board
   end
 
   def in_check?(color)
+    king_pos = find_king(color)
+    opposite_pieces = find_all_pieces(color == :white ? :black : :white)
+    opposite_pieces.any? { |piece| piece.moves(self).include?(king_pos) }
+  end
 
+  def checkmate?(color)
+    in_check?(color) && any_moves?(color)
+  end
+
+  def deep_dup(array)
+    grid = deep_dup_helper(array)
+    Board.new(grid)
+  end
+
+  private
+
+  def any_moves?(color)
+    find_all_pieces(color).any? { |piece| piece.moves(@board).!empty? }
+  end
+
+  def deep_dup_helper(array)
+    array.map { |el| el.is_a?(Array) ? deep_dup_helper(el) : el.dup }
   end
 
   def find_king(color)
     @grid.each do |row|
       row.each do |square|
         return square.location if square.is_a?(King) &&
-                                  square.color == color
+        square.color == color
       end
     end
     nil
   end
 
-  private
+  def find_all_pieces(color)
+    pieces = []
+    @grid.each do |row|
+      row.each do |square|
+        pieces << square if square.color == color
+      end
+    end
+    pieces
+  end
 
   def create_pieces
     create_kings
@@ -99,9 +132,10 @@ end
 b = Board.new
 
 
-b.move_piece([7,7],[5,0])
-b.move_piece([0,0],[5,1])
-
-p b.find_king(:black)
-
-# p b
+# b.move_piece([6, 3], [2, 0])
+# b.move_piece([7, 7], [6, 2])
+# b.move_piece([0, 0], [5, 3])
+# b.move_piece([0,2],[3,0])
+# b.move_piece([1,2],[5,0])
+#
+# p b[[6, 2]].valid_moves(b)

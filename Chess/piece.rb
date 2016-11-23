@@ -1,4 +1,5 @@
 require 'singleton'
+require 'byebug'
 
 UNICODE_HASH = {
   white_king: "\u2654".encode('utf-8'),
@@ -57,6 +58,7 @@ end
 class Piece
   attr_accessor :location
   attr_reader :color
+
   def initialize(color, location)
     @color = color
     @location = location
@@ -66,12 +68,26 @@ class Piece
     @location = location
   end
 
+  def dup
+    self.class.new(self.color, self.location)
+  end
+
   def to_s
     #duck typing
   end
 
-  def moves
+  def moves(board)
     #duck typing
+  end
+
+  def valid_moves(board)
+    p moves(board)
+    moves(board).reject do |move|
+      duped_board = board.deep_dup(board.grid)
+      duped_board.move_piece(self.location, move)
+      # debugger
+      duped_board.in_check?(self.color)
+    end
   end
 
 end
@@ -139,47 +155,41 @@ end
 
 class Pawn < Piece
 
+  def pawn_move(diff, board)
+    possible_location = [self.location[0] + diff[0], self.location[1] + diff[1]]
+
+    if diff[1] == 1 #diagonals
+      col = (self.color == :white ? :black : :white)
+    else #forward moves
+      col = nil
+    end
+    if board.in_bounds?(possible_location) && board[possible_location].color == col
+      possible_location
+    end
+  end
+
   def moves(board)
     possible_moves = []
+    orig_pawn_row = move_dirs[0][0] == 1 ? 1 : 6
+    advance_move = [self.location[0] + move_dirs[2][0], self.location[1]]
 
-    if self.color == :white
-      right_diag = [self.location[0] + 1, self.location[1] + 1]
-      left_diag = [self.location[0] + 1, self.location[1] - 1]
-      advance_move = [self.location[0] + 1, self.location[1]]
-      advance_two = [self.location[0] + 2, self.location[1]]
-
-      possible_moves << right_diag if board[right_diag].color == :black &&
-                                      board.in_bounds?(right_diag)
-      possible_moves << left_diag if board[left_diag].color == :black &&
-                                     board.in_bounds?(left_diag)
-      possible_moves << advance_move unless board[advance_move].color ||
-                                     !board.in_bounds?(advance_move)
-      if possible_moves.include?(advance_move) && self.location[0] == 1
-        possible_moves << advance_two unless board[advance_move].color ||
-                                     !board.in_bounds?(advance_move)
+    move_dirs.each_with_index do |diff, idx|
+      if idx == 3
+        next unless self.location[0] == orig_pawn_row && possible_moves.include?(advance_move)
       end
-    elsif self.color == :black
-      right_diag = [self.location[0] - 1, self.location[1] + 1]
-      left_diag = [self.location[0] - 1, self.location[1] - 1]
-      advance_move = [self.location[0] - 1, self.location[1]]
-      advance_two = [self.location[0] - 2, self.location[1]]
-
-      possible_moves << right_diag if board[right_diag].color == :white &&
-                                      board.in_bounds?(right_diag)
-      possible_moves << left_diag if board[left_diag].color == :white &&
-                                     board.in_bounds?(left_diag)
-      possible_moves << advance_move unless board[advance_move].color ||
-                                     !board.in_bounds?(advance_move)
-      if possible_moves.include?(advance_move) && self.location[0] == 6
-        possible_moves << advance_two unless board[advance_move].color ||
-                                     !board.in_bounds?(advance_move)
-      end
+      possible_move = pawn_move(diff, board)
+      possible_moves << possible_move if possible_move
     end
-    return possible_moves
+
+    possible_moves
   end
 
   def move_dirs
-    #duck typing
+    if self.color == :white
+      [[1, 1], [1, -1], [1, 0], [2, 0]]
+    elsif self.color == :black
+      [[-1, 1], [-1, -1], [-1, 0], [-2, 0]]
+    end
   end
 
   def to_s
@@ -191,6 +201,10 @@ class NullPiece < Piece
   include Singleton
 
   def initialize
+  end
+
+  def dup
+    self
   end
 
   def to_s

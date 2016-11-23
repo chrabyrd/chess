@@ -24,12 +24,21 @@ class Display
   def rendering
     render
     @cursor.get_input
-    render
   end
 end
 
+
+
 b = Board.new
 
-d = Display.new(b)
 
+b.move_piece([6, 3], [2, 0])
+b.move_piece([7, 7], [6, 2])
+b.move_piece([0, 0], [5, 3])
+b.move_piece([0,2],[3,0])
+b.move_piece([1,2],[5,0])
+
+d = Display.new(b)
 d.rendering
+
+p b[[6, 2]].valid_moves(b)
