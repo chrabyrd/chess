@@ -9,13 +9,16 @@ class Display
   end
 
   def render
-    cur_piece = @board[@cursor.cursor_pos] #some piece
     print "   "
     (0..7).each { |n| print "#{n} " }
-    @board.grid.each_with_index do |row, idx|
-      print "\n #{idx} "
-      row.each do |piece|
-        print piece == cur_piece ? "#{piece.to_s.colorize(:background => :red)} " : "#{piece.to_s} "
+    @board.grid.each_with_index do |row, row_idx|
+      print "\n #{row_idx} "
+      row.each_with_index do |piece , col_idx|
+        if [row_idx, col_idx] == @cursor.cursor_pos
+          print "#{piece.to_s.colorize(:background => :red)} "
+        else
+          print "#{piece.to_s} "
+        end
       end
     end
     print "\n"
