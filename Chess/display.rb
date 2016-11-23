@@ -22,8 +22,11 @@ class Display
   end
 
   def rendering
-    render
-    @cursor.get_input
+    loop do
+      render
+      @cursor.get_input
+      system 'clear'
+    end
   end
 end
 
@@ -32,13 +35,17 @@ end
 b = Board.new
 
 
-b.move_piece([6, 3], [2, 0])
-b.move_piece([7, 7], [6, 2])
-b.move_piece([0, 0], [5, 3])
-b.move_piece([0,2],[3,0])
-b.move_piece([1,2],[5,0])
-
+b.move_piece([6, 2], [4, 2])
+b.move_piece([6, 1], [4, 1])
+b.move_piece([1, 3], [3, 3])
+b.move_piece([0,4],[4,0])
+# b.move_piece([6,0],[3,7])
+# b.move_piece([7,0],[6,1])
+b.move_piece([6,4],[5,4])
+# b.move_piece([1,2],[5,0])
 d = Display.new(b)
 d.rendering
 
-p b[[6, 2]].valid_moves(b)
+p b.in_check?(:black)
+
+p b.checkmate?(:black)

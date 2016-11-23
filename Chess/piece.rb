@@ -81,11 +81,9 @@ class Piece
   end
 
   def valid_moves(board)
-    p moves(board)
     moves(board).reject do |move|
       duped_board = board.deep_dup(board.grid)
       duped_board.move_piece(self.location, move)
-      # debugger
       duped_board.in_check?(self.color)
     end
   end
@@ -158,7 +156,7 @@ class Pawn < Piece
   def pawn_move(diff, board)
     possible_location = [self.location[0] + diff[0], self.location[1] + diff[1]]
 
-    if diff[1] == 1 #diagonals
+    if diff[1] != 0 #diagonals
       col = (self.color == :white ? :black : :white)
     else #forward moves
       col = nil

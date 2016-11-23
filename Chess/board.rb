@@ -25,6 +25,7 @@ class Board
     self[start_pos], self[end_pos] = self[end_pos], self[start_pos]
     self[start_pos].update_location(start_pos)
     self[end_pos].update_location(end_pos)
+    self[start_pos] = NullPiece.instance
   end
 
   def in_bounds?(pos)
@@ -38,7 +39,7 @@ class Board
   end
 
   def checkmate?(color)
-    in_check?(color) && any_moves?(color)
+    in_check?(color) && no_moves?(color)
   end
 
   def deep_dup(array)
@@ -48,8 +49,10 @@ class Board
 
   private
 
-  def any_moves?(color)
-    find_all_pieces(color).any? { |piece| piece.moves(@board).!empty? }
+  def no_moves?(color)
+    find_all_pieces(color).all? do |piece|
+      piece.valid_moves(self).empty?
+    end
   end
 
   def deep_dup_helper(array)
